@@ -12,8 +12,8 @@ from htfspider.items import BookListItem
 
 
 class QidianMaleIndexSpider(RedisSpider):
-    name = 'qidian_index_male'
-    redis_key = 'qidian:index:male'
+    name = 'qidian_index'
+    redis_key = 'qidian:index'
 
     def make_request_from_data(self, data):
         data = pickle.loads(data)
