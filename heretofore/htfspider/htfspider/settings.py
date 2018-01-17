@@ -5,21 +5,21 @@ BOT_NAME = 'htfspider'
 SPIDER_MODULES = ['htfspider.spiders']
 NEWSPIDER_MODULE = 'htfspider.spiders'
 
-ROBOTSTXT_OBEY = False
+# ROBOTSTXT_OBEY = False
 
 LOG_LEVEL = "DEBUG"
 
 CONCURRENT_REQUESTS = 32
 
-# COOKIES_ENABLED = False
+COOKIES_ENABLED = False
 
 ITEM_PIPELINES = {
-    # 'htfspider.pipelines.HtfspiderPipeline': 300,
-    'scrapy_redis.pipelines.RedisPipeline': 300
+    'htfspider.pipelines.HtfspiderPipeline': 310,
+    # 'scrapy_redis.pipelines.RedisPipeline': 300
 }
 
 SPIDER_MIDDLEWARES = {
-    'htfspider.middlewares.ErrorSaveMiddleware': 100
+    # 'htfspider.middlewares.ErrorSaveMiddleware': 100
 }
 
 EXTENSIONS = {
@@ -43,6 +43,10 @@ SCHEDULER_PERSIST = True
 SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
 REDIS_START_URLS_AS_SET = True
 REDIS_URL = 'redis://localhost:6379/0'
+
+# mongodb
+MONGO_URI = 'mongodb://localhost:27017'
+DB_NAME = 'htf_spider'
 
 try:
     from production_settings import *
