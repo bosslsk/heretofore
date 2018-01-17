@@ -46,7 +46,7 @@ class Runner(object):
         spider_path = os.path.join(base_dir, 'htfspider')
         spider_task_monitor = SpiderTaskScheduler(spider_path, spider_pid_file_path)
 
-        while any(not spider_task_monitor.is_finished(spider_name, redis_server) for spider_name in index_spiders):
+        while any(not spider_task_monitor.is_finished(spider_name, redis_server) for spider_name in self.index_spiders):
             # TODO: 或许有更好的方式？
             time.sleep(5)
 

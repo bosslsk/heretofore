@@ -135,4 +135,4 @@ if __name__ == '__main__':
 
     r = redis.StrictRedis()
     spider_task_scheduler = SpiderTaskScheduler()
-    print spider_task_scheduler.is_finished('qidian_index_male', r)
+    print spider_task_scheduler.is_finished('qidian_index', r)
