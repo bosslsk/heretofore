@@ -17,7 +17,7 @@ class SpiderTaskScheduler(object):
                 short_command_format='scrapy crawl {spider_name}',
                 command_format='cd {path};scrapy crawl {spider_name} & >> /Users/heyao/Desktop/heretofore/{spider_name}.log 2>&1'):
         self.spider_path = spider_path
-        self.spider_pid_file_path = spider_pid_file_path
+        self.spider_pid_file_path = os.path.join(spider_pid_file_path, 'spider_%(spider_name)s.pid')
         self.project_name = project_name
         self.short_command_format = short_command_format
         self.command_format = command_format
@@ -33,7 +33,10 @@ class SpiderTaskScheduler(object):
 
     def _read_pid(self, pid_path):
         with open(pid_path, 'r') as f:
-            pids = map(int, f.read().split(','))
+            try:
+                pids = map(int, f.read().split(','))
+            except ValueError:
+                pids = []
         return pids
 
     def schedule(self, spider_name, count=1):
@@ -68,8 +71,7 @@ class SpiderTaskScheduler(object):
         """
         pids = self._read_pid(self.spider_pid_file_path % dict(spider_name=spider_name))
         if pids:
-            command = self.command_format.format(path=self.spider_path, spider_name=spider_name)
-            os.system(command)
+            pids = self.schedule(spider_name, len(pids))
         return pids
 
     def stop(self, spider_name, redis_server, force_stop=False):
