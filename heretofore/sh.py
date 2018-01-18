@@ -37,3 +37,9 @@ class MonitProcess(object):
     def process_exists(self, pids):
         """pid对应的进程是否存在"""
         return any(psutil.pid_exists(pid) for pid in pids)
+
+    def cup_state(self, interval=1):
+        return psutil.cpu_percent(interval)
+
+    def memory_state(self):
+        return psutil.virtual_memory()
