@@ -78,7 +78,7 @@ class QidianDetailSpider(RedisSpider):
             item['reward'] = int(response.xpath('//div[@class="ticket"]/p[3]/em/text()').extract()[0])
         except IndexError:
             item['reward'] = -1
-        item['book_status'] = u'完本' in response.xpath('//span[@class="blue"]').extract()[0]
+        item['book_status'] = (u'完本' in response.xpath('//span[@class="blue"]').extract()[0]) * 1
         book_updated_at = self.parse_updated_at(response.xpath('//em[@class="time"]/text()').extract()[0])
         item['book_updated_at'] = datetime.datetime.strptime(book_updated_at, '%Y-%m-%d %H:%M:%S')
         item['updated_at'] = self.today
