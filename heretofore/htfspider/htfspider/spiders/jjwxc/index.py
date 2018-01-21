@@ -36,10 +36,9 @@ class JjwxcIndexSpider(RedisSpider):
             return req
 
     def parse(self, response):
-        item = BookListItem()
-        # data = response.meta['data']
         book_list = response.xpath('//table[@class="cytable"]/tbody/tr')[1:]
         for book in book_list:
+            item = BookListItem()
             href = book.xpath('./td/a/@href').extract()[1]
             item['book_id'] = urlparse(href).query.split('=')[1]
             try:
