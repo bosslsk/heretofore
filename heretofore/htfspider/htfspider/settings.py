@@ -19,7 +19,7 @@ ITEM_PIPELINES = {
 }
 
 SPIDER_MIDDLEWARES = {
-    # 'htfspider.middlewares.ErrorSaveMiddleware': 100
+    'htfspider.middlewares.ErrorSaveMiddleware': 100
 }
 
 EXTENSIONS = {
