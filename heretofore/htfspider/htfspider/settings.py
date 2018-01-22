@@ -8,8 +8,9 @@ NEWSPIDER_MODULE = 'htfspider.spiders'
 # ROBOTSTXT_OBEY = False
 
 LOG_LEVEL = "DEBUG"
+LOG_FILE = '/Users/heyao/Desktop/htf_spider.log'
 
-CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 64
 
 COOKIES_ENABLED = False
 
@@ -19,7 +20,7 @@ ITEM_PIPELINES = {
 }
 
 SPIDER_MIDDLEWARES = {
-    # 'htfspider.middlewares.ErrorSaveMiddleware': 100
+    'htfspider.middlewares.ErrorSaveMiddleware': 100
 }
 
 EXTENSIONS = {
@@ -28,8 +29,8 @@ EXTENSIONS = {
 }
 
 # on spider open close extension
-OOC_INTERVAL = 60
-OOC_TOTAL = 5
+OOC_INTERVAL = 30  # seconds
+OOC_TOTAL = 4  # times
 
 # SCRAPY_REDIS
 REDIS_ITEMS_KEY = '%(spider)s:items'
@@ -47,6 +48,11 @@ REDIS_URL = 'redis://localhost:6379/0'
 # mongodb
 MONGO_URI = 'mongodb://localhost:27017'
 DB_NAME = 'htf_spider'
+AUTH = {}
+
+# master settings
+MASTER_HOST = 'localhost'
+MASTER_PORT = '8001'
 
 try:
     from production_settings import *

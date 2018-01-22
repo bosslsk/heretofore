@@ -4,13 +4,15 @@ create on 2018-01-17 下午4:48
 
 author @heyao
 """
+import datetime
 
-from flask import jsonify, request
+from flask import jsonify, request, url_for, current_app
 
-from app import basic_auth
+from app import basic_auth, mongodb
 from app.exceptions import ApiExceptions, UNAUTHORIZED, INTERNAL_SERVER_ERROR
 from . import api
 from .. import task_redis
+from ..tasks.http.slave import task_schedule_spider, task_resume_spider_if_has_data
 from heretofore.runner.scheduler import SpiderTaskScheduler
 from heretofore.sh import MonitProcess
 
@@ -93,3 +95,24 @@ def memory():
 def cpu():
     cpu_info = monitor_process.cup_state(3)
     return jsonify(code=200, msg='SUCCESS', data=dict(cpu_percent=cpu_info))
+
+
+@api.route('/ready/stop/<spider_name>')
+# @basic_auth.login_required
+def ready_stop(spider_name):
+    master_host = current_app.config['MASTER_HOST']
+    master_port = current_app.config['APP_PORT']
+    task_schedule_spider.delay('pause', spider_name, master_host, master_port)
+    dt = datetime.datetime.utcnow() + datetime.timedelta(seconds=5)
+    task_resume_spider_if_has_data.apply_async((spider_name, master_host, master_port), eta=dt)
+    return jsonify(code=200, msg='SUCCESS', data={})
+
+
+@api.route('/ready/start/<spider_name>')
+# @basic_auth.login_required
+def ready_start(spider_name):
+    result = mongodb.db['log'].update(
+        {'_id': 'htf_spider#{name}#{dt}'.format(name=spider_name, dt=datetime.datetime.strftime('%Y-%m-%d'))},
+        {'$set': {'had_run': True, 'status': '0%'}}
+    )
+    return result['nModified']
