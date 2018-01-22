@@ -29,8 +29,8 @@ EXTENSIONS = {
 }
 
 # on spider open close extension
-OOC_INTERVAL = 30
-OOC_TOTAL = 4
+OOC_INTERVAL = 30  # seconds
+OOC_TOTAL = 4  # times
 
 # SCRAPY_REDIS
 REDIS_ITEMS_KEY = '%(spider)s:items'
@@ -49,6 +49,10 @@ REDIS_URL = 'redis://localhost:6379/0'
 MONGO_URI = 'mongodb://localhost:27017'
 DB_NAME = 'htf_spider'
 AUTH = {}
+
+# master settings
+MASTER_HOST = 'localhost'
+MASTER_PORT = '8001'
 
 try:
     from production_settings import *

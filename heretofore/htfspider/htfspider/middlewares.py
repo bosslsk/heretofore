@@ -6,6 +6,7 @@
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.conf import settings
 
 
 class ErrorSaveMiddleware(object):
@@ -28,6 +29,4 @@ class ErrorSaveMiddleware(object):
     #     return response
 
     def process_spider_error(self, failure, response, spider):
-        error = [{'func': e[0], 'file': '/'.join(e[1].rsplit('/', 4)[-4:]), 'error_no': e[2]} for e in failure.frames if
-                 'htfspider' in e[1]]
-        print dict(error=error, url=response.url, spider=spider.name)
+        print dict(error=failure.getTraceback(), url=response.url, spider=spider.name)

@@ -5,6 +5,8 @@ create on 2018-01-11 下午5:27
 author @heyao
 """
 
+# 失败了raise一个异常，然后根据异常msg，判断是否重新抓取
+
 import json
 import time
 import datetime
@@ -77,7 +79,7 @@ class QidianDetailSpider(RedisSpider):
         try:
             item['reward'] = int(response.xpath('//div[@class="ticket"]/p[3]/em/text()').extract()[0])
         except IndexError:
-            item['reward'] = -1
+            item['reward'] = 0
         item['book_status'] = (u'完本' in response.xpath('//span[@class="blue"]').extract()[0]) * 1
         book_updated_at = self.parse_updated_at(response.xpath('//em[@class="time"]/text()').extract()[0])
         item['book_updated_at'] = datetime.datetime.strptime(book_updated_at, '%Y-%m-%d %H:%M:%S')
