@@ -5,6 +5,7 @@ create on 2018-01-17 下午4:48
 author @heyao
 """
 
+from celery import Celery
 from flask import Flask
 from flask_httpauth import HTTPBasicAuth
 
@@ -14,6 +15,7 @@ from flask_redis import Redis
 from config import config
 
 basic_auth = HTTPBasicAuth()
+celery = Celery(__name__)
 mongodb = PyMongo()
 task_redis = Redis()
 
@@ -29,5 +31,19 @@ def create_app(config_name):
     from .api import api as api_blueprint
 
     app.register_blueprint(api_blueprint, url_prefix='/api')
+
+    param = app.config.iteritems()
+    param = {k[0]: k[1] for k in param if not k[0].startswith('_')}
+    celery.conf.update(param)
+    TaskBase = celery.Task
+
+    class ContextTask(TaskBase):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+
+    celery.Task = ContextTask
 
     return app

@@ -11,7 +11,7 @@ from flask import jsonify
 from flask_restful import Api
 from flask_script import Shell, Server, Manager
 
-from app import create_app, basic_auth
+from app import create_app, basic_auth, celery
 # from .app.models import User, Role
 from app.exceptions import ApiExceptions
 

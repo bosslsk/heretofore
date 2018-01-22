@@ -24,6 +24,14 @@ class DevelopmentConfig(Config):
 
     LOG_PATH = '/Users/heyao/spider_api.log'
 
+    # master
+    MASTER_HOST = 'localhost'
+
+    # celery
+    BROKER_URL = 'redis://localhost:6379/1'
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+    CELERY_TASK_SERIALIZER = 'json'
+
 
 config = dict(
     default=DevelopmentConfig,
