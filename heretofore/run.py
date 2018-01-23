@@ -27,7 +27,6 @@ def generate_id_coll(spider_name):
 
 
 def collect_data(spider_name, mongodb, limit=0):
-    # TODO: 这里index库写死了
     source_id, data_coll = generate_id_coll(spider_name)
     param = {'_id': 0, 'status': 0, 'updated_at': 0, 'created_at': 0}
     if 'index' in data_coll:
@@ -48,7 +47,7 @@ def generate_data(spider_name, mongodb, limit=0):
         return data
     for i in data:
         if spider_name == 'jjwxc_detail':
-            i['data_url'] = i['url']
+            i['data_url'] = 'http://app.jjwxc.org/androidapi/novelbasicinfo?novelId={}'.format(i['book_id'])
         else:
             i['data_url'] = i['url']
         if spider_name == 'qidian_detail':
@@ -75,14 +74,14 @@ con = pymongo.MongoClient()
 r = redis.StrictRedis()
 db = con['htf_spider']
 dt = time.strftime('%Y-%m-%d')
-limit = 100
+limit = 30
 
-print 'start index'
-start_spider(r, db, 'qidian_index', dt)
-while not scheduler.is_finished('qidian_index', r):
-    time.sleep(15)
+# print 'start index'
+# start_spider(r, db, 'jjwxc_index', dt)
+# while not scheduler.is_finished('jjwxc_index', r):
+#     time.sleep(15)
 print 'start detail'
-start_spider(r, db, 'qidian_detail', dt, limit=limit)
+start_spider(r, db, 'jjwxc_detail', dt)
 # response = requests.get('https://book.qidian.com/info/1011093299')
 # csrf_token = response.cookies.get("_csrfToken")
 # print 'csrf_token:', csrf_token
