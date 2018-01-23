@@ -4,14 +4,15 @@
     @time: 2018/1/18 17:18
     @subject: 晋江文学城 http://www.jjwxc.net
 """
+
 import sys
-import time
 import json
+import time
 from collections import Counter
 from datetime import datetime
 import cPickle as pickle
 
-from scrapy import Request, Selector
+from scrapy import Request, Selector, FormRequest
 from scrapy_redis.spiders import RedisSpider
 
 from htfspider.items import BookDetailItem
@@ -29,9 +30,10 @@ class JjwxcDetialSpider(RedisSpider):
         data = pickle.loads(data)
         url = data.pop('data_url', None)
         if url:
-            req = Request(
+            req = FormRequest(
                 url,
                 meta={'data': data},
+                formdata={'versionCode': '75'},
                 callback=self.parse,
                 dont_filter=True
             )
@@ -39,7 +41,7 @@ class JjwxcDetialSpider(RedisSpider):
 
     def parse(self, response):
         item = BookDetailItem()
-        item.update(response.meta('data'))
+        item.update(response.meta['data'])
         detail_json = json.loads(response.body)
         item['source_id'] = 7
         item['total_word'] = int(detail_json['novelSize'].replace(',', ''))

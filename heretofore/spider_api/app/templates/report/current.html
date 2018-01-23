@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}
+    日报
+{% endblock %}
+
+{% block page_content %}
+    <div class="col-md-12 column">
+        <div class="row clearfix">
+            <form role="form">
+                <div class="form-group">
+
+                    <div class="col-md-10 column">
+                        <div class="row clearfix">
+                            <span style="float: right;"><h5>选择时间：</h5></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 column">
+                        <div class="row clearfix">
+                            <select class="selectpicker" data-live-search="true" id="dates">
+                                <option value="{{ current }}">{{ current }}</option>
+                                {% for d in dates %}
+                                    {% if d != current %}
+                                        <option value="{{ d }}">{{ d }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <table class="table table-hover">
+                <thead>
+                <td>#</td>
+                <td>project</td>
+                <td>spider</td>
+                <td>status</td>
+                <td>started_at</td>
+                <td>finished_at</td>
+                <td>duration</td>
+                <td>total_items</td>
+                <td>crawled_items</td>
+                <td>percent</td>
+                <td>had_run</td>
+                <td>date</td>
+                </thead>
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ log.project }}</td>
+                        <td>{{ log.name }}</td>
+                        <td>{{ log.status }}</td>
+                        <td>{% if log.start_at %}{{ log.start_at|datetime('yyyy-MM-dd HH:mm:ss') }}{% endif %}</td>
+                        <td>{% if log.end_at %}{{ log.end_at|datetime('yyyy-MM-dd HH:mm:ss') }}{% endif %}</td>
+                        <td>{% if log.duration %}{{ log.duration|seconds2hms }}{% endif %}</td>
+                        <td>{{ log.total_items }}</td>
+                        <td>{{ log.crawl_items }}</td>
+                        <td>{% if log.percent %}{{ '%.1f%%'|format(log.percent / 10) }}{% endif %}</td>
+                        <td>{{ log.had_run }}</td>
+                        <td>{% if log.date %}{{ log.date|datetime('yyyy-MM-dd') }}{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $('.selectpicker').on('changed.bs.select', function (e) {
+            var date = $('.selectpicker').find("option:selected").attr('value');
+            window.location.href = '/report/' + date;
+        });
+        {#        $(function () {#}
+        {#            $.get('/report/date', function (result) {#}
+        {#                if (result.code === 200) {#}
+        {#                    var dates = result.data.dates;#}
+        {#                    var d;#}
+        {#                    var obj = document.getElementById('dates');#}
+        {#                    var html = '';#}
+        {#                    for (d in dates) {#}
+        {#                        html += '<option value="' + dates[d] + '">' + dates[d] + '</option>\n';#}
+        {#                    }#}
+        {#                    obj.innerHTML = html;#}
+        {#                }#}
+        {#            })#}
+        {#        })#}
+    </script>
+{% endblock %}
