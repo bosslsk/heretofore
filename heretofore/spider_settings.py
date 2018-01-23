@@ -31,5 +31,8 @@ index_start_url_dict = {
         'url': 'https://www.qidian.com/mm/all?orderId=5&style=1&pageSize=20&siteid=0&pubflag=0&hiddenField=0&page={page}',
         'total_page': 300
     },
-    'jjwxc': {}
+    'jjwxc': {
+        'url': 'http://www.jjwxc.net/bookbase.php?fw0=0&fbsj=0&ycx0=0&xx0=0&mainview0=0&sd0=0&lx0=0&fg0=0&sortType=1&isfinish=0&collectiontypes=ors&searchkeywords=&page={page}',
+        'total_page': 100
+    }
 }
