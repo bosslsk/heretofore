@@ -15,7 +15,7 @@ class DevelopmentConfig(Config):
     # SQLALCHEMY_DATABASE_URI = 'mysql://root:@localhost:3306/love_defending'
     MONGO_HOST = 'localhost'
     MONGO_PORT = '27017'
-    MONGO_DBNAME = 'love_defending'
+    MONGO_DBNAME = 'htf_spider'
     MONGO_USERNAME = ''
     MONGO_PASSWORD = ''
 

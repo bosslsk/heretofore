@@ -14,6 +14,7 @@ from flask_script import Shell, Server, Manager
 from app import create_app, basic_auth, celery
 # from .app.models import User, Role
 from app.exceptions import ApiExceptions
+from jinja import format_datetime, seconds2hms
 
 app = create_app(os.environ.get('SPIDER_CONFIG_NAME', 'default'))
 api = Api(app)
@@ -47,6 +48,10 @@ def handle_flask_error(error):
     response.code = error.code
     return response
 
+
+# jinja2 env
+app.jinja_env.filters['datetime'] = format_datetime
+app.jinja_env.filters['seconds2hms'] = seconds2hms
 
 if __name__ == '__main__':
     manager.run()

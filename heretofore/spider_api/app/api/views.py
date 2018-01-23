@@ -12,11 +12,13 @@ from app import basic_auth, mongodb
 from app.exceptions import ApiExceptions, UNAUTHORIZED, INTERNAL_SERVER_ERROR
 from . import api
 from .. import task_redis
-from ..tasks.http.slave import task_schedule_spider, task_resume_spider_if_has_data
+from ..tasks.http.slave import task_schedule_spider, task_resume_spider_if_has_data, task_on_spider_open
+from ..utils import RequestParser
 from heretofore.runner.scheduler import SpiderTaskScheduler
 from heretofore.sh import MonitProcess
 
-scheduler = SpiderTaskScheduler(spider_path='/Users/heyao/heretofore/heretofore/htfspider', spider_pid_file_path='/Users/heyao/heretofore/heretofore/var')
+scheduler = SpiderTaskScheduler(spider_path='/Users/heyao/heretofore/heretofore/htfspider',
+                                spider_pid_file_path='/Users/heyao/heretofore/heretofore/var')
 monitor_process = MonitProcess()
 
 
@@ -101,18 +103,27 @@ def cpu():
 # @basic_auth.login_required
 def ready_stop(spider_name):
     master_host = current_app.config['MASTER_HOST']
-    master_port = current_app.config['APP_PORT']
-    task_schedule_spider.delay('pause', spider_name, master_host, master_port)
+    task_schedule_spider.delay('pause', spider_name, master_host)
     dt = datetime.datetime.utcnow() + datetime.timedelta(seconds=5)
-    task_resume_spider_if_has_data.apply_async((spider_name, master_host, master_port), eta=dt)
+    task_resume_spider_if_has_data.apply_async((spider_name, master_host), eta=dt)
     return jsonify(code=200, msg='SUCCESS', data={})
 
 
 @api.route('/ready/start/<spider_name>')
 # @basic_auth.login_required
 def ready_start(spider_name):
-    result = mongodb.db['log'].update(
-        {'_id': 'htf_spider#{name}#{dt}'.format(name=spider_name, dt=datetime.datetime.strftime('%Y-%m-%d'))},
-        {'$set': {'had_run': True, 'status': '0%'}}
-    )
-    return result['nModified']
+    task_on_spider_open.delay(spider_name)
+    return jsonify(code=200, msg='SUCCESS', data=None)
+
+
+@api.route('/traceback/save/<spider_name>', methods=['POST'])
+# @basic_auth.login_required
+def traceback_save(spider_name):
+    request_parser = RequestParser()
+    request_parser.add_argument('data', type=dict, required=True, location=('json', ))
+    args = request_parser.parse_args()
+    data = args['data']
+    data['created_at'] = datetime.datetime.now()
+    data['spider'] = spider_name
+    mongodb.db['traceback'].insert(data)
+    return jsonify(code=200, msg='SUCCESS', data=None)
