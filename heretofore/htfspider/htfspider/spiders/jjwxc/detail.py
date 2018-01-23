@@ -26,7 +26,7 @@ class JjwxcDetialSpider(RedisSpider):
     today = datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
 
     def make_request_from_data(self, data):
-        data = pickle.loads(pickle.dumps(data))
+        data = pickle.loads(data)
         url = data.pop('data_url', None)
         if url:
             req = Request(
