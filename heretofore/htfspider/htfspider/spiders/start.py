@@ -15,6 +15,7 @@ from hm_collections.queue.redis_queue import RedisSetQueue
 coll = pymongo.MongoClient()['htf_spider']['book_index']
 
 
+# ===============================================================
 def start_jjwxc_index():
     for page in range(1, 442):
         r = redis.StrictRedis()
@@ -46,6 +47,19 @@ def start_jjwxc_detail():
         )
 
 
+# ===============================================================
+def start_chuangshi_index():
+    for page in range(1, 1930):
+        r = redis.StrictRedis()
+        queue = RedisSetQueue(r, 'chuangshi:index', serializer=pickle)
+        queue.push(
+            {
+                'data_url': 'http://chuangshi.qq.com/bk/p/{}.html'.format(page)
+            }
+        )
+
+
 if __name__ == '__main__':
     # start_jjwxc_index()
-    start_jjwxc_detail()
+    # start_jjwxc_detail()
+    start_chuangshi_index()
