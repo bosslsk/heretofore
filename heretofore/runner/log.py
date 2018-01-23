@@ -17,12 +17,12 @@ class LogSystem(object):
         """
         :param project: project name
         :param mongodb: `pymongo.database.Database` object.
-        :param spider_name: 
-        :param source_id:
-        :param dt:
-        :param data_coll:
+        :param spider_name: `scrapy.Spider.name`
+        :param source_id: int
+        :param dt: str. "yyyy-mm-dd"
+        :param data_coll: 
         :param log_coll:
-        :param sep:
+        :param sep: default '_'
         """
         self.project = project
         self.mongodb = mongodb
@@ -65,11 +65,9 @@ class LogSystem(object):
 
     def _get_crawled_items(self):
         today = datetime.datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
+        crawl_items = -1
         if self.data_coll == 'book_detail':
-            key = 'updated_at'
-        else:
-            key = 'created_at'
-        crawl_items = self.mongodb['book_detail'].find({'source_id': self.source_id, key: today}).count()
+            crawl_items = self.mongodb['book_detail'].find({'source_id': self.source_id, 'updated_at': today}).count()
         return crawl_items
 
     def update_total_items(self, total_items):
@@ -92,32 +90,39 @@ class LogSystem(object):
         if not log_info:
             raise RuntimeError("please run 'init_log' first")
         if not log_info.get('had_run', False):
-            raise RuntimeError("spider %s not running" % self.spider_name)
-        runtime = int((datetime.datetime.now() - log_info['start_at']).total_seconds())
+            return False
+        if log_info['status'] == 'finished':
+            return False
+        dt = log_info['start_at']
+        dt = dt.replace(tzinfo=None)
+        runtime = int((datetime.datetime.now() - dt).total_seconds())
         crawl_items = self._get_crawled_items()
         percent = -1
         if self.data_coll == 'book_detail':
             percent = crawl_items * 1. / log_info['total_items']
         self.mongodb[self.log_coll].update_one(
             {'_id': _id},
-            {'$set': {'duration': runtime, 'crawl_items': crawl_items, 'percent': round(percent, 3)}}
+            {'$set': {'duration': runtime, 'crawl_items': crawl_items, 'percent': int(round(percent, 3) * 1000)}}
         )
+        return True
 
     def on_open(self):
         _id = '{project}{sep}{name}{sep}{dt}'.format(
             project=self.project, sep=self.sep, name=self.spider_name, dt=self.dt
         )
-        self.mongodb[self.log_coll].update_one(
+        result = self.mongodb[self.log_coll].update_one(
             {'_id': _id},
             {'$set': {'start_at': datetime.datetime.now(), 'status': 'running', 'had_run': True}}
         )
+        return result
 
     def on_close(self):
         _id = '{project}{sep}{name}{sep}{dt}'.format(
             project=self.project, sep=self.sep, name=self.spider_name, dt=self.dt
         )
         self.run_time()
-        self.mongodb[self.log_coll].update_one(
+        result = self.mongodb[self.log_coll].update_one(
             {'_id': _id},
             {'$set': {'end_at': datetime.datetime.now(), 'status': 'finished'}}
         )
+        return result
