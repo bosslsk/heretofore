@@ -4,15 +4,14 @@
     @time: 2018/1/18 17:18
     @subject: 晋江文学城 http://www.jjwxc.net
 """
+import sys
+import time
+import json
 from collections import Counter
 from datetime import datetime
-import sys
-
-import time
-from pandas import json
 import cPickle as pickle
 
-from scrapy import FormRequest, Request, Selector
+from scrapy import Request, Selector
 from scrapy_redis.spiders import RedisSpider
 
 from htfspider.items import BookDetailItem

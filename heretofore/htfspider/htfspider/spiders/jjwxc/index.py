@@ -4,13 +4,11 @@
     @time: 2018/1/17 16:38
     @subject: 晋江文学城 http://www.jjwxc.net
 """
+import time
+import json
 import cPickle as pickle
 from HTMLParser import HTMLParser
-
 from datetime import datetime
-import time
-
-from pandas import json
 from urlparse import urlparse
 
 from scrapy import Request, FormRequest
@@ -36,15 +34,14 @@ class JjwxcIndexSpider(RedisSpider):
             return req
 
     def parse(self, response):
-        item = BookListItem()
-        # data = response.meta['data']
         book_list = response.xpath('//table[@class="cytable"]/tbody/tr')[1:]
         for book in book_list:
+            item = BookListItem()
             href = book.xpath('./td/a/@href').extract()[1]
             item['book_id'] = urlparse(href).query.split('=')[1]
             try:
                 published_at = book.xpath('./td/text()').extract()[-1].split(' ')[0]
-            except SyntaxError as e:
+            except IndexError as e:
                 self.logger.debug('no publish time: %s' % item['book_id'])
                 continue
             item['published_at'] = datetime.strptime(published_at, '%Y-%m-%d')
