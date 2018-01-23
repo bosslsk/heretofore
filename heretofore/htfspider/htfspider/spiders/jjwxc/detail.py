@@ -27,31 +27,20 @@ class JjwxcDetialSpider(RedisSpider):
     today = datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
 
     def make_request_from_data(self, data):
-        data = pickle.loads(data)
+        data = pickle.loads(pickle.dumps(data))
         url = data.pop('data_url', None)
-        item = BookDetailItem()
-        item['book_id'] = data.pop('book_id', None)
         if url:
             req = Request(
                 url,
-                meta={'item': item},
+                meta={'data': data},
+                callback=self.parse,
                 dont_filter=True
             )
             return req
 
-    # def start_requests(self):
-    #     item = BookDetailItem()
-    #     item['book_id'] = '3433838'
-    #     json_url = 'http://app.jjwxc.org/androidapi/novelbasicinfo?novelId={}'.format(item['book_id'])
-    #     return [FormRequest(
-    #         json_url,
-    #         formdata={'versionCode': '75'},
-    #         meta={'item': item},
-    #         dont_filter=True
-    #     )]
-
     def parse(self, response):
-        item = response.meta['item']
+        item = BookDetailItem()
+        item.update(response.meta('data'))
         detail_json = json.loads(response.body)
         item['source_id'] = 7
         item['total_word'] = int(detail_json['novelSize'].replace(',', ''))
@@ -86,7 +75,7 @@ class JjwxcDetialSpider(RedisSpider):
         if '暂无霸王票' in response.body:
             yield item
         else:
-            sel = Selector(text=response.body.decode('gbk'))
+            sel = Selector(text=response.body.decode('gbk', 'ignore'))
             fans_level.extend(sel.xpath('//*[@id="rank"]/div[2]/table/tr/td[2]/text()').extract())
             fans_page += 1
             if fans_page > 5:

@@ -36,16 +36,17 @@ class JjwxcIndexSpider(RedisSpider):
             return req
 
     def parse(self, response):
+        item = BookListItem()
+        # data = response.meta['data']
         book_list = response.xpath('//table[@class="cytable"]/tbody/tr')[1:]
         for book in book_list:
-            item = BookListItem()
             href = book.xpath('./td/a/@href').extract()[1]
             item['book_id'] = urlparse(href).query.split('=')[1]
             try:
                 published_at = book.xpath('./td/text()').extract()[-1].split(' ')[0]
             except SyntaxError as e:
-                published_at = '0001-01-01'
-                self.logger.error([] + e)
+                self.logger.debug('no publish time: %s' % item['book_id'])
+                continue
             item['published_at'] = datetime.strptime(published_at, '%Y-%m-%d')
             book_url = 'http://app.jjwxc.org/androidapi/novelbasicinfo?novelId={}'.format(item['book_id'])
             yield FormRequest(
@@ -65,7 +66,7 @@ class JjwxcIndexSpider(RedisSpider):
             return
         sign = int(detail_json['isSign'])
         if sign == 0:
-            self.logger.debug('[NO SIGN] ' + response.url)
+            self.logger.debug('[NOT SIGN] ' + response.url)
             return
         item['source_id'] = 7
         item['url'] = 'http://www.jjwxc.net/onebook.php?novelid={}'.format(item['book_id'])
@@ -77,10 +78,10 @@ class JjwxcIndexSpider(RedisSpider):
             item['category'] = ''
             item['sub_category'] = ''
         else:
-            item['category'] = detail_json['novelClass'].split('-')[1]
-            item['sub_category'] = detail_json['novelClass'].split('-')[-1]
+            item['category'] = detail_json['novelClass']
+            item['sub_category'] = ''  # detail_json['novelClass'].split('-')[-1]
         introduction = HTMLParser().unescape(detail_json['novelIntro'])
-        item['introduction'] = '\n'.join(p.replace(' ', '') for p in introduction.split('<br/>') if p != '')
+        item['introduction'] = '\n'.join(p.strip() for p in introduction.split('<br/>') if p != '')
         item['status'] = 1
         item['created_at'] = self.today
         item['updated_at'] = self.today
