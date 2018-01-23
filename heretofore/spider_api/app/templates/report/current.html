@@ -50,14 +50,13 @@
                         <td>{{ log.project }}</td>
                         <td>{{ log.name }}</td>
                         <td>{{ log.status }}</td>
-                        <td>{% if log.start_at %}{{ log.start_at|datetime('yyyy-MM-dd HH:mm:ss') }}{% endif %}</td>
-                        <td>{% if log.end_at %}{{ log.end_at|datetime('yyyy-MM-dd HH:mm:ss') }}{% endif %}</td>
+
                         <td>{% if log.duration %}{{ log.duration|seconds2hms }}{% endif %}</td>
                         <td>{{ log.total_items }}</td>
                         <td>{{ log.crawl_items }}</td>
                         <td>{% if log.percent %}{{ '%.1f%%'|format(log.percent / 10) }}{% endif %}</td>
                         <td>{{ log.had_run }}</td>
-                        <td>{% if log.date %}{{ log.date|datetime('yyyy-MM-dd') }}{% endif %}</td>
+
                     </tr>
                 {% endfor %}
             </table>

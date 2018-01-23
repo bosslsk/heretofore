@@ -7,8 +7,7 @@ author @heyao
 
 from flask import request
 
-from CODES import *
-from nlp.exceptions import BadRequest
+from app.exceptions import BadRequest
 
 
 class RequestParser(object):

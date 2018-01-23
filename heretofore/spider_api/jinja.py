@@ -8,8 +8,8 @@ author @heyao
 import babel
 
 
-def format_datetime(value, format='%Y-%m-%d'):
-    return babel.dates.format_datetime(value, format)
+# def format_datetime(value, format='%Y-%m-%d'):
+#     return babel.dates.format_datetime(value, format)
 
 
 def seconds2hms(seconds):
