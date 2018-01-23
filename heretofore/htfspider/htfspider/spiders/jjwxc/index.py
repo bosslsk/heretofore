@@ -4,16 +4,16 @@
     @time: 2018/1/17 16:38
     @subject: 晋江文学城 http://www.jjwxc.net
 """
+
+import json
+import time
 import cPickle as pickle
+from datetime import datetime
 from HTMLParser import HTMLParser
 
-from datetime import datetime
-import time
-
-from pandas import json
-from urlparse import urlparse
-
+import pymongo
 from scrapy import Request, FormRequest
+from scrapy.conf import settings
 from scrapy_redis.spiders import RedisSpider
 
 from htfspider.items import BookListItem
@@ -23,6 +23,18 @@ class JjwxcIndexSpider(RedisSpider):
     name = 'jjwxc_index'
     redis_key = 'jjwxc:index'
     today = datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
+
+    def __init__(self):
+        super(JjwxcIndexSpider, self).__init__()
+        mongo_uri = settings.get("MONGO_URI")
+        db_name = settings.get("DB_NAME")
+        auth = settings.get("AUTH")
+        client = pymongo.MongoClient(mongo_uri)
+        db = client[db_name]
+        if auth:
+            db.authenticate(**auth)
+        books = set(i['book_id'] for i in db['book_index'].find({'source_id': 7}, {'book_id': 1}))
+        self.books = books
 
     def make_request_from_data(self, data):
         data = pickle.loads(data)
@@ -36,15 +48,17 @@ class JjwxcIndexSpider(RedisSpider):
             return req
 
     def parse(self, response):
-        item = BookListItem()
-        # data = response.meta['data']
         book_list = response.xpath('//table[@class="cytable"]/tbody/tr')[1:]
         for book in book_list:
             href = book.xpath('./td/a/@href').extract()[1]
-            item['book_id'] = urlparse(href).query.split('=')[1]
+            book_id = href.split('=')[1]
+            if book_id in self.books:
+                continue
+            item = BookListItem()
+            item['book_id'] = book_id
             try:
                 published_at = book.xpath('./td/text()').extract()[-1].split(' ')[0]
-            except SyntaxError as e:
+            except IndexError:
                 self.logger.debug('no publish time: %s' % item['book_id'])
                 continue
             item['published_at'] = datetime.strptime(published_at, '%Y-%m-%d')

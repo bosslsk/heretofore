@@ -6,6 +6,7 @@ author @heyao
 """
 
 # 失败了raise一个异常，然后根据异常msg，判断是否重新抓取
+# 没有data这个key的时候，重试，最大重试次数可设置
 
 import json
 import time
@@ -14,7 +15,9 @@ import cPickle as pickle
 from collections import Counter
 
 from scrapy import Request
+from scrapy.conf import settings
 from scrapy_redis.spiders import RedisSpider
+
 from htfspider.items import BookDetailItem
 
 
@@ -73,7 +76,8 @@ class QidianDetailSpider(RedisSpider):
         item['total_recommend'] = self.str2num(total_recommend, cite)
         try:
             item['total_ticket'] = int(response.xpath('//div[@class="ticket month-ticket"]/p[2]/i/text()').extract()[0])
-            item['ticket_rank'] = int(response.xpath('//div[@class="ticket month-ticket"]/p[3]/text()').extract_first('hy0')[2:])
+            item['ticket_rank'] = int(
+                response.xpath('//div[@class="ticket month-ticket"]/p[3]/text()').extract_first('hy0')[2:])
         except (IndexError, UnicodeEncodeError):
             item['total_ticket'] = -1
             item['ticket_rank'] = -1
@@ -88,20 +92,24 @@ class QidianDetailSpider(RedisSpider):
         fans_url = 'https://book.qidian.com/fansrank/{0}'.format(item['book_id'])
         yield Request(
             fans_url,
-            meta={'item': item},
+            meta={'item': item, 'retry': 0},
             callback=self.parse_fans,
             dont_filter=True
         )
 
     def parse_fans(self, response):
         item = response.meta['item']
+        retry = response.meta['retry']
+        max_retry = settings.get("TOKEN_MAX_RETRY", 3)
+        if retry >= max_retry:
+            raise RuntimeError("retry more than %s" % max_retry)
         fans_list = response.xpath('//div[contains(@class, "tab-cot ")]/ul/li/span[2]/text()').extract()
         counter = Counter(fans_list)
         item['fans'] = [{'name': key, 'value': counter[key]} for key in counter]
         url_format = 'https://book.qidian.com/ajax/comment/index?_csrfToken={token}&bookId={book_id}&pageSize=15'
         yield Request(
             url_format.format(token=self.csrf_token, book_id=item['book_id']),
-            meta={'item': item},
+            meta={'item': item, 'retry': retry},
             headers={'Cookie': '_csrfToken=' + self.csrf_token},
             callback=self.parse_score,
             dont_filter=True
@@ -109,13 +117,26 @@ class QidianDetailSpider(RedisSpider):
 
     def parse_score(self, response):
         item = response.meta['item']
+        retry = response.meta['retry']
         json_data = json.loads(response.body)
+        if 'data' not in json_data:
+            retry += 1
+            url_format = 'https://book.qidian.com/ajax/comment/index?_csrfToken={token}&bookId={book_id}&pageSize=15'
+            yield Request(
+                url_format.format(token=self.csrf_token, book_id=item['book_id']),
+                meta={'item': item, 'retry': retry},
+                headers={'Cookie': '_csrfToken=' + self.csrf_token},
+                callback=self.parse_score,
+                dont_filter=True
+            )
+            return
         item['total_score'] = json_data['data']['rate']
         item['total_scored_user'] = json_data['data']['userCount']
         url_format = 'https://book.qidian.com/ajax/book/GetBookForum?_csrfToken={token}&authorId={author_id}&bookId={book_id}&chanId={chan_id}&pageSize=15'
         yield Request(
-            url_format.format(token=self.csrf_token, author_id=item['author_id'], book_id=item['book_id'], chan_id=item['chan_id']),
-            meta={'item': item},
+            url_format.format(token=self.csrf_token, author_id=item['author_id'], book_id=item['book_id'],
+                              chan_id=item['chan_id']),
+            meta={'item': item, 'retry': 0},
             headers={'Cookie': '_csrfToken=' + self.csrf_token},
             callback=self.parse_comment,
             dont_filter=True
@@ -123,5 +144,19 @@ class QidianDetailSpider(RedisSpider):
 
     def parse_comment(self, response):
         item = response.meta['item']
-        item['total_comment'] = json.loads(response.body)['data']['threadCnt']
+        retry = response.meta['retry']
+        json_data = json.loads(response.body)
+        if 'data' not in json_data:
+            retry += 1
+            url_format = 'https://book.qidian.com/ajax/book/GetBookForum?_csrfToken={token}&authorId={author_id}&bookId={book_id}&chanId={chan_id}&pageSize=15'
+            yield Request(
+                url_format.format(token=self.csrf_token, author_id=item['author_id'], book_id=item['book_id'],
+                                  chan_id=item['chan_id']),
+                meta={'item': item, 'retry': retry},
+                headers={'Cookie': '_csrfToken=' + self.csrf_token},
+                callback=self.parse_comment,
+                dont_filter=True
+            )
+            return
+        item['total_comment'] = json_data['data']['threadCnt']
         yield item
