@@ -21,7 +21,6 @@ class ChuangshiDetailSpider(Spider):
     name = 'chuangshi_detail'
     rediskey = 'chuangshi:detail'
     today = datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
-    start_urls = ['http://chuangshi.qq.com/bk/da/20468795.html']
 
     def make_requests_from_url(self, data):
         data = pickle.loads(data)

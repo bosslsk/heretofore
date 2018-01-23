@@ -48,6 +48,8 @@ def generate_data(spider_name, mongodb, limit=0):
     for i in data:
         if spider_name == 'jjwxc_detail':
             i['data_url'] = 'http://app.jjwxc.org/androidapi/novelbasicinfo?novelId={}'.format(i['book_id'])
+        if spider_name == 'chuangshi_datail':
+            i['data_url'] = 'http://chuangshi.qq.com/bk/a/{}.html'.format(i['book_id'])
         else:
             i['data_url'] = i['url']
         if spider_name == 'qidian_detail':
@@ -81,7 +83,7 @@ limit = 30
 # while not scheduler.is_finished('jjwxc_index', r):
 #     time.sleep(15)
 print 'start detail'
-start_spider(r, db, 'jjwxc_detail', dt)
+start_spider(r, db, 'chuangshi_index', dt)
 # response = requests.get('https://book.qidian.com/info/1011093299')
 # csrf_token = response.cookies.get("_csrfToken")
 # print 'csrf_token:', csrf_token
