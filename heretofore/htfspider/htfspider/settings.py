@@ -13,6 +13,7 @@ LOG_FILE = '/Users/heyao/Desktop/htf_spider.log'
 CONCURRENT_REQUESTS = 64
 
 DOWNLOAD_TIMEOUT = 5
+RETRY_TIMES = 5
 
 COOKIES_ENABLED = False
 
@@ -22,7 +23,12 @@ ITEM_PIPELINES = {
 }
 
 SPIDER_MIDDLEWARES = {
-    'htfspider.middlewares.ErrorSaveMiddleware': 100
+    'htfspider.middlewares.ErrorSaveMiddleware': 300,
+}
+
+DOWNLOADER_MIDDLEWARES = {
+    'htfspider.middlewares.CustomerRetryMiddleware': 200,
+    'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
 }
 
 EXTENSIONS = {
