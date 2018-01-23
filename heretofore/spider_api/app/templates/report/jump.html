@@ -10,7 +10,7 @@
             $.get('{{ url_for('main.report_date') }}', function (result) {
                 if (result.code === 200) {
                     var date = result.data.recent;
-                    window.location.href = '/report/' + date;
+                    window.location.href = '/report/' + date + '?_=' + Date.parse(new Date());
                 }
             })
         })

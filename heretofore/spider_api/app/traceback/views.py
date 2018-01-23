@@ -42,7 +42,7 @@ def generate_pagination(data, page, pagesize=6):
 def trace_spider(page):
     page = int(page)
     pagesize = 6
-    tracebacks = mongodb.db['traceback'].find({'status': {'$ne': 1}})
+    tracebacks = mongodb.db['traceback'].find({'status': {'$ne': 1}, 'error_type': 1}).sort([('created_at', -1), ('status', 1)])
     pagination, tracebacks = generate_pagination(tracebacks, page, pagesize)
     for traceback in tracebacks:
         traceback['error'] = traceback['error'].split('\n')
