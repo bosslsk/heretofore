@@ -12,6 +12,8 @@ LOG_FILE = '/Users/heyao/Desktop/htf_spider.log'
 
 CONCURRENT_REQUESTS = 64
 
+DOWNLOAD_TIMEOUT = 5
+
 COOKIES_ENABLED = False
 
 ITEM_PIPELINES = {
@@ -29,7 +31,7 @@ EXTENSIONS = {
 }
 
 # on spider open close extension
-OOC_INTERVAL = 5  # seconds
+OOC_INTERVAL = 30  # seconds
 OOC_TOTAL = 2  # times
 
 # SCRAPY_REDIS
