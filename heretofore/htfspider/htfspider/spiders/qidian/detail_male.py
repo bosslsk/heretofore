@@ -28,7 +28,7 @@ class QidianDetailSpider(RedisSpider):
         url = data.pop('data_url', None)
         csrf_token = data.pop('csrf_token', None)
         self.csrf_token = csrf_token
-        if not csrf_token:
+        if csrf_token is None:
             raise RuntimeError('no "csrf_token", must set')
         if url:
             req = Request(
@@ -61,6 +61,7 @@ class QidianDetailSpider(RedisSpider):
         item.update(response.meta['data'])
 
         update_info = response.xpath('//div[@class="book-info "]/p[last()-1]')
+        # total_word = update_info.xpath('./em[1]/text()').extract()[100]
         total_word = update_info.xpath('./em[1]/text()').extract()[0]
         cite = update_info.xpath('./cite[1]/text()').extract()[0]
         item['total_word'] = self.str2num(total_word, cite)

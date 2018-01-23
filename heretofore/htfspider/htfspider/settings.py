@@ -29,8 +29,8 @@ EXTENSIONS = {
 }
 
 # on spider open close extension
-OOC_INTERVAL = 30  # seconds
-OOC_TOTAL = 4  # times
+OOC_INTERVAL = 5  # seconds
+OOC_TOTAL = 2  # times
 
 # SCRAPY_REDIS
 REDIS_ITEMS_KEY = '%(spider)s:items'

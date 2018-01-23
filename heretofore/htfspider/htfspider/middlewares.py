@@ -5,6 +5,8 @@
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
+import requests
+
 from scrapy import signals
 from scrapy.conf import settings
 
@@ -29,4 +31,6 @@ class ErrorSaveMiddleware(object):
     #     return response
 
     def process_spider_error(self, failure, response, spider):
-        print dict(error=failure.getTraceback(), url=response.url, spider=spider.name)
+        data = dict(error=failure.getTraceback(), url=response.url, spider=spider.name)
+        url = 'http://{host}/api/traceback/save/{name}'.format(host=settings.get("MASTER_HOST"), name=spider.name)
+        requests.post(url, json={'data': data})

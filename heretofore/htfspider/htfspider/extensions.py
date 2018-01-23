@@ -73,5 +73,5 @@ class SpiderOnOpenClose(object):
         if self.task and self.task.running:
             self.task.stop()
         # 发送退出消息，让master发送SIGINT指令
-        requests.get('http://{host}/api/ready/pause/{name}'.format(host=settings.get("MASTER_HOST"), name=spider.name))
+        requests.get('http://{host}/api/ready/stop/{name}'.format(host=settings.get("MASTER_HOST"), name=spider.name))
         logger.info('close spider %s, reason %s' % (spider.name, reason))

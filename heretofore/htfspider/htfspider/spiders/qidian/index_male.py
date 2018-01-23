@@ -10,7 +10,9 @@ import time
 import datetime
 import cPickle as pickle
 
+import pymongo
 from scrapy import Request
+from scrapy.conf import settings
 from scrapy_redis.spiders import RedisSpider
 from htfspider.items import BookListItem
 
@@ -19,6 +21,18 @@ class QidianMaleIndexSpider(RedisSpider):
     name = 'qidian_index'
     redis_key = 'qidian:index'
     today = datetime.datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
+
+    def __init__(self):
+        super(QidianMaleIndexSpider, self).__init__()
+        mongo_uri = settings.get("MONGO_URI")
+        db_name = settings.get("DB_NAME")
+        auth = settings.get("AUTH")
+        client = pymongo.MongoClient(mongo_uri)
+        db = client[db_name]
+        if auth:
+            db.authenticate(**auth)
+        books = set(i['book_id'] for i in db['book_index'].find({'source_id': 1}, {'book_id': 1}))
+        self.books = books
 
     def make_request_from_data(self, data):
         data = pickle.loads(data)
@@ -37,6 +51,9 @@ class QidianMaleIndexSpider(RedisSpider):
         book_list = response.xpath('//ul[@class="all-img-list cf"]/li')
         for book in book_list:
             url = response.urljoin(book.xpath('./div[2]/h4/a/@href').extract()[0])
+            book_id = url.split('/')[-1]
+            if book_id in self.books:
+                continue
             yield Request(
                 url,
                 meta={'data': data},
