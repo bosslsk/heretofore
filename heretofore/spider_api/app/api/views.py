@@ -6,7 +6,7 @@ author @heyao
 """
 import datetime
 
-from flask import jsonify, request, url_for, current_app
+from flask import jsonify, request, current_app
 
 from app import basic_auth, mongodb
 from app.exceptions import ApiExceptions, UNAUTHORIZED, INTERNAL_SERVER_ERROR
@@ -14,12 +14,6 @@ from . import api
 from .. import task_redis
 from ..tasks.http.slave import task_schedule_spider, task_resume_spider_if_has_data, task_on_spider_open
 from ..utils import RequestParser
-from heretofore.runner.scheduler import SpiderTaskScheduler
-from heretofore.sh import MonitProcess
-
-scheduler = SpiderTaskScheduler(spider_path='/Users/heyao/heretofore/heretofore/htfspider',
-                                spider_pid_file_path='/Users/heyao/heretofore/heretofore/var')
-monitor_process = MonitProcess()
 
 
 @basic_auth.error_handler
@@ -30,7 +24,7 @@ def unauthorized():
 @api.route('/')
 # @basic_auth.login_required
 def index():
-    return jsonify(code=200, msg="I'm alive", data=None)
+    return jsonify(code=200, msg="I'm alive", data={'host': dict(request.headers)})
 
 
 @api.route('/schedul/<spider_name>')
@@ -41,21 +35,21 @@ def schedul(spider_name):
         workers = int(workers)
     except ValueError as e:
         raise ApiExceptions(INTERNAL_SERVER_ERROR, msg=e.message)
-    scheduler.schedule(spider_name, workers)
+    current_app.scheduler.schedule(spider_name, workers)
     return jsonify(code=200, msg='SUCCESS', data=None)
 
 
 @api.route('/pause/<spider_name>')
 # @basic_auth.login_required
 def pause(spider_name):
-    scheduler.pause(spider_name)
+    current_app.scheduler.pause(spider_name)
     return jsonify(code=200, msg='SUCCESS', data=None)
 
 
 @api.route('/resume/<spider_name>')
 # @basic_auth.login_required
 def resume(spider_name):
-    scheduler.resume(spider_name)
+    current_app.scheduler.resume(spider_name)
     return jsonify(code=200, msg='SUCCESS', data=None)
 
 
@@ -67,14 +61,14 @@ def stop(spider_name):
         force = int(force)
     except ValueError as e:
         raise ApiExceptions(INTERNAL_SERVER_ERROR, msg=e.message)
-    scheduler.stop(spider_name, task_redis, force)
+    current_app.scheduler.stop(spider_name, task_redis, force)
     return jsonify(code=200, msg='SUCCESS', data=None)
 
 
 @api.route('/finished/<spider_name>')
 # @basic_auth.login_required
 def is_finished(spider_name):
-    b = scheduler.is_finished(spider_name, task_redis)
+    b = current_app.scheduler.is_finished(spider_name, task_redis)
     return jsonify(code=200, msg='SUCCESS', data={'finished': b})
 
 
@@ -84,7 +78,7 @@ def memory():
     """内容使用情况
     :return: 
     """
-    memory_info = monitor_process.memory_state()
+    memory_info = current_app.monitor_process.memory_state()
     keys = ['total', 'free', 'available', 'used', 'active', 'inactive', 'wired']
     percent = memory_info.percent
     memory_info = {k: round(getattr(memory_info, k) * 1. / 1024 / 1024, 2) for k in keys}
@@ -95,17 +89,18 @@ def memory():
 @api.route('/cpu')
 # @basic_auth.login_required
 def cpu():
-    cpu_info = monitor_process.cup_state(3)
+    cpu_info = current_app.monitor_process.cup_state(3)
     return jsonify(code=200, msg='SUCCESS', data=dict(cpu_percent=cpu_info))
 
 
+# ======== master ========
 @api.route('/ready/stop/<spider_name>')
 # @basic_auth.login_required
 def ready_stop(spider_name):
-    master_host = current_app.config['MASTER_HOST']
-    task_schedule_spider.delay('pause', spider_name, master_host)
+    host = request.headers.get("X-Forwarded-For")
+    task_schedule_spider.delay('pause', spider_name, host)
     dt = datetime.datetime.utcnow() + datetime.timedelta(seconds=5)
-    task_resume_spider_if_has_data.apply_async((spider_name, master_host), eta=dt)
+    task_resume_spider_if_has_data.apply_async((spider_name, host), eta=dt)
     return jsonify(code=200, msg='SUCCESS', data={})
 
 
@@ -120,7 +115,7 @@ def ready_start(spider_name):
 # @basic_auth.login_required
 def traceback_save(spider_name):
     request_parser = RequestParser()
-    request_parser.add_argument('data', type=dict, required=True, location=('json', ))
+    request_parser.add_argument('data', type=dict, required=True, location=('json',))
     args = request_parser.parse_args()
     data = args['data']
     data['created_at'] = datetime.datetime.now()
