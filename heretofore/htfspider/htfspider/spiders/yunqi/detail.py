@@ -12,14 +12,15 @@ from datetime import datetime
 import cPickle as pickle
 
 
-from scrapy import Spider, Request, Selector
+from scrapy import Request, Selector
+from scrapy_redis.spiders import RedisSpider
 
 from htfspider.items import BookDetailItem
 
 
-class YunqiDetailSpider(Spider):
+class YunqiDetailSpider(RedisSpider):
     name = 'yunqi_detail'
-    rediskey = 'yunqi:detail'
+    redis_key = 'yunqi:detail'
     today = datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
 
     def make_requests_from_url(self, data):
@@ -28,6 +29,7 @@ class YunqiDetailSpider(Spider):
         if url:
             req = Request(
                 url,
+                meta={'data': data},
                 callback=self.parse,
                 dont_filter=True
             )
@@ -35,7 +37,8 @@ class YunqiDetailSpider(Spider):
 
     def parse(self, response):
         item = BookDetailItem()
-        item['source_id'] = 8
+        item.update(response.meta['data'])
+        item['source_id'] = 11
         item['book_id'] = response.url.split('/')[-1].split('.')[0]
         item['book_status'] = 1
         item['total_word'] = int(response.xpath(u'string(//td[contains(.,"总字数")])').extract()[0].split(u'：')[1].strip())
@@ -46,9 +49,9 @@ class YunqiDetailSpider(Spider):
         item['book_status'] = response.xpath('//div[@id="novelInfo"]//span[@class="red2"]/text()').extract()[0]
         book_updated_at = response.xpath('//div[@class="chaptername"]/text()').extract()[0]
         item['book_updated_at'] = datetime.strptime(re.findall(r"\d{4}-\d+-\d+", book_updated_at)[0], '%Y-%m-%d')
-        headers = {'Referer': 'http://chuangshi.qq.com/bk/ds/{}.html'.format(item['book_id'])}
+        headers = {'Referer': 'http://yunqi.qq.com/bk/ds/{}.html'.format(item['book_id'])}
         yield Request(
-            url='http://chuangshi.qq.com/novelcomment/index.html?bid={}'.format(item['book_id']),
+            url='http://yunqi.qq.com/novelcomment/index.html?bid={}'.format(item['book_id']),
             headers=headers,
             meta={'item': item},
             callback=self.parse_total_comment,
