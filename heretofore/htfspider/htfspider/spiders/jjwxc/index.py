@@ -54,25 +54,22 @@ class JjwxcIndexSpider(RedisSpider):
             book_id = href.split('=')[1]
             if book_id in self.books:
                 continue
-            item = BookListItem()
-            item['book_id'] = book_id
             try:
                 published_at = book.xpath('./td[8]/text()').extract()[0].split(' ')[0]
             except IndexError:
-                self.logger.debug('no publish time: %s' % item['book_id'])
+                self.logger.debug('no publish time: %s' % book_id)
                 continue
-            item['published_at'] = datetime.strptime(published_at, '%Y-%m-%d')
-            book_url = 'http://app.jjwxc.org/androidapi/novelbasicinfo?novelId={}'.format(item['book_id'])
+            published_at = datetime.strptime(published_at, '%Y-%m-%d')
+            book_url = 'http://app.jjwxc.org/androidapi/novelbasicinfo?novelId={}'.format(book_id)
             yield FormRequest(
                 book_url,
                 formdata={'versionCode': '75'},
-                meta={'item': item},
+                meta={'published_at': published_at, 'book_id': book_id},
                 callback=self.parse_detail,
                 dont_filter=True
             )
 
     def parse_detail(self, response):
-        item = response.meta['item']
         detail_json = json.loads(response.body)
         if 'code' in detail_json:
             return
@@ -84,6 +81,9 @@ class JjwxcIndexSpider(RedisSpider):
         if sign == 0:
             self.logger.debug('[NOT SIGN] ' + response.url)
             return
+        item = BookListItem()
+        item['published_at'] = response.meta['published_at']
+        item['book_id'] = response.meta['book_id']
         item['source_id'] = 7
         item['url'] = 'http://www.jjwxc.net/onebook.php?novelid={}'.format(item['book_id'])
         item['folder_url'] = detail_json['novelCover']
