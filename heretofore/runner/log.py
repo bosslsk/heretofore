@@ -111,7 +111,7 @@ class LogSystem(object):
             project=self.project, sep=self.sep, name=self.spider_name, dt=self.dt
         )
         result = self.mongodb[self.log_coll].update_one(
-            {'_id': _id},
+            {'_id': _id, 'status': 'pending'},
             {'$set': {'start_at': datetime.datetime.now(), 'status': 'running', 'had_run': True}}
         )
         return result
