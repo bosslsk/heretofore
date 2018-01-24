@@ -25,7 +25,7 @@ class DevelopmentConfig(Config):
     LOG_PATH = '/Users/heyao/spider_api.log'
 
     # master
-    MASTER_HOST = 'localhost'
+    MASTER_HOST = '192.168.1.18'
 
     # celery
     BROKER_URL = 'redis://localhost:6379/1'

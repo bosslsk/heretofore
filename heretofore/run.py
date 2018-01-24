@@ -57,7 +57,7 @@ def generate_data(spider_name, mongodb, limit=0):
     return data
 
 
-def start_spider(redis_server, mongodb, spider_name, dt, limit=0):
+def start_spider(redis_server, mongodb, spider_name, dt, host='localhost', limit=0):
     source_id, data_coll = generate_id_coll(spider_name)
     queue = RedisSetQueue(redis_server, spider_name.replace('_', ':'), pickle)
     log_system = LogSystem('htf_spider', mongodb, spider_name, source_id, dt, data_coll, sep='#')
@@ -66,7 +66,7 @@ def start_spider(redis_server, mongodb, spider_name, dt, limit=0):
     log_system.update_total_items(len(data))
     for i in data:
         queue.push(i)
-    url = 'http://{host}/api/schedul/{spider}?workers={workers}'.format(host=master_host, spider=spider_name, workers=4)
+    url = 'http://{host}/api/schedul/{spider}?workers={workers}'.format(host=host, spider=spider_name, workers=4)
     requests.get(url)
     return True
 

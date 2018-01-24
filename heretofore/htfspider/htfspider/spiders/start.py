@@ -59,7 +59,20 @@ def start_chuangshi_index():
         )
 
 
+# ===============================================================
+def start_yunqi_index():
+    for page in range(1, 1000):
+        r = redis.StrictRedis()
+        queue = RedisSetQueue(r, 'yunqi:index', serializer=pickle)
+        queue.push(
+            {
+                'data_url': 'http://yunqi.qq.com/bk/so12/n30p{}'.format(page)
+            }
+        )
+
+
 if __name__ == '__main__':
     # start_jjwxc_index()
     # start_jjwxc_detail()
-    start_chuangshi_index()
+    # start_chuangshi_index()
+    start_yunqi_index()
