@@ -16,7 +16,7 @@ from scrapy_redis.spiders import RedisSpider
 from htfspider.items import BookDetailItem
 
 
-class QidianDetailSpider(RedisSpider):
+class QdmmDetailSpider(RedisSpider):
     name = 'qdmm_detail'
     redis_key = 'qdmm:detail'
     today = datetime.datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
