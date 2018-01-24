@@ -17,8 +17,8 @@ from ..utils import RequestParser
 from heretofore.runner.scheduler import SpiderTaskScheduler
 from heretofore.sh import MonitProcess
 
-scheduler = SpiderTaskScheduler(spider_path='/Users/heyao/heretofore/heretofore/htfspider',
-                                spider_pid_file_path='/Users/heyao/heretofore/heretofore/var')
+scheduler = SpiderTaskScheduler(spider_path='H:/Git/heretofore/heretofore/htfspider',
+                                spider_pid_file_path='H:/Git/heretofore/heretofore/var')
 monitor_process = MonitProcess()
 
 

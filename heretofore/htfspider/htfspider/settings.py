@@ -51,15 +51,17 @@ SCHEDULER_SERIALIZER = "cPickle"
 SCHEDULER_PERSIST = True
 SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
 REDIS_START_URLS_AS_SET = True
-REDIS_URL = 'redis://localhost:6379/0'
+# REDIS_URL = 'redis://localhost:6379/0'
+REDIS_URL = 'redis://192.168.1.18:6379/0'
 
 # mongodb
-MONGO_URI = 'mongodb://localhost:27017'
+# MONGO_URI = 'mongodb://localhost:27017'
+MONGO_URI = 'mongodb://192.168.1.18:27017'
 DB_NAME = 'htf_spider'
 AUTH = {}
 
 # master settings
-MASTER_HOST = 'localhost'
+MASTER_HOST = '192.168.1.18'
 MASTER_PORT = '8001'
 
 try:

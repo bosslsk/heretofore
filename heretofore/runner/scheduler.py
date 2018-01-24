@@ -15,9 +15,9 @@ from heretofore.sh import MonitProcess
 class SpiderTaskScheduler(object):
     def __init__(self, spider_path, spider_pid_file_path, project_name='htfspider',
                 short_command_format='scrapy crawl {spider_name}',
-                command_format='cd {path};scrapy crawl {spider_name} & >> /Users/heyao/Desktop/heretofore/{spider_name}.log 2>&1'):
+                command_format='cd {path};H:;scrapy crawl {spider_name} &'):
         self.spider_path = spider_path
-        self.spider_pid_file_path = os.path.join(spider_pid_file_path, 'spider_%(spider_name)s.pid')
+        self.spider_pid_file_path = os.path.join(spider_pid_file_path, 'spider_%(spider_name)s.pid').replace('\\', '/')
         self.project_name = project_name
         self.short_command_format = short_command_format
         self.command_format = command_format
@@ -48,6 +48,7 @@ class SpiderTaskScheduler(object):
         if not isinstance(count, int) or count < 1:
             raise ValueError("'count' must be int and must greater than 1")
         command = self.command_format.format(path=self.spider_path, spider_name=spider_name)
+        print command
         for _ in range(count):
             os.system(command)
         short_command = self.short_command_format.format(spider_name=spider_name)
