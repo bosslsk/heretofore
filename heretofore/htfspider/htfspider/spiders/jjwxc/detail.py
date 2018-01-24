@@ -40,9 +40,16 @@ class JjwxcDetialSpider(RedisSpider):
             return req
 
     def parse(self, response):
-        item = BookDetailItem()
-        item.update(response.meta['data'])
         detail_json = json.loads(response.body)
+        item = BookDetailItem()
+        data = response.meta['data']
+        if 'code' in detail_json:
+            item['status'] = 0
+            item['source_id'] = data['source_id']
+            item['book_id'] = data['book_id']
+            yield item
+            return
+        item.update(response.meta['data'])
         item['source_id'] = 7
         item['total_word'] = int(detail_json['novelSize'].replace(',', ''))
         item['total_click'] = int(detail_json['novip_clicks'].replace(',', ''))

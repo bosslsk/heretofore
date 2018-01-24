@@ -50,14 +50,14 @@ class JjwxcIndexSpider(RedisSpider):
     def parse(self, response):
         book_list = response.xpath('//table[@class="cytable"]/tbody/tr')[1:]
         for book in book_list:
-            href = book.xpath('./td/a/@href').extract()[1]
+            href = book.xpath('./td[2]/a/@href').extract()[0]
             book_id = href.split('=')[1]
             if book_id in self.books:
                 continue
             item = BookListItem()
             item['book_id'] = book_id
             try:
-                published_at = book.xpath('./td/text()').extract()[-1].split(' ')[0]
+                published_at = book.xpath('./td[8]/text()').extract()[0].split(' ')[0]
             except IndexError:
                 self.logger.debug('no publish time: %s' % item['book_id'])
                 continue
@@ -74,8 +74,10 @@ class JjwxcIndexSpider(RedisSpider):
     def parse_detail(self, response):
         item = response.meta['item']
         detail_json = json.loads(response.body)
+        if 'code' in detail_json:
+            return
         clock = int(detail_json['islock'])
-        if clock == 1:
+        if clock:
             self.logger.debug('[THIS BOOK IS CLOCK] ' + response.url)
             return
         sign = int(detail_json['isSign'])

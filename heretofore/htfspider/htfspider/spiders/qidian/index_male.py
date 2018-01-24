@@ -69,7 +69,7 @@ class QidianMaleIndexSpider(RedisSpider):
         data = response.meta['data']
         item = BookListItem()
         xpath_folder_url = '//div[@class="book-information cf"]/div[@class="book-img"]/a/img/@src'
-        xpath_title = '//div[@class="book-information cf"]/div[2]/h1/em/text()'
+        xpath_title = '//div[@class="book-information cf"]/div[@class="book-info "]/h1/em/text()'
         xpath_author = '//div[@class="book-information cf"]//a[@class="writer"]/text()'
         xpath_author_id = '//a[@class="writer"]/@href'
         xpath_category = '//div[@class="book-information cf"]//a[@class="red"]/text()'

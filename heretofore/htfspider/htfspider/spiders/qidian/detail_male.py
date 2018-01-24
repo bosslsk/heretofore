@@ -25,6 +25,7 @@ class QidianDetailSpider(RedisSpider):
     name = 'qidian_detail'
     redis_key = 'qidian:detail'
     today = datetime.datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
+    handle_httpstatus_list = [400]
 
     def make_request_from_data(self, data):
         data = pickle.loads(data)
@@ -62,7 +63,10 @@ class QidianDetailSpider(RedisSpider):
     def parse(self, response):
         item = BookDetailItem()
         item.update(response.meta['data'])
-
+        if response.status == 400:
+            item['status'] = 0
+            yield item
+            return
         update_info = response.xpath('//div[@class="book-info "]/p[last()-1]')
         # total_word = update_info.xpath('./em[1]/text()').extract()[100]
         total_word = update_info.xpath('./em[1]/text()').extract()[0]
