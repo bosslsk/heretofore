@@ -37,6 +37,6 @@ index_start_url_dict = {
     },
     'chuangshi': {
         'url': 'http://chuangshi.qq.com/bk/so2/p/{page}.html',
-        'total_page': 20
+        'total_page': 70
     }
 }
