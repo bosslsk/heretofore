@@ -27,6 +27,10 @@ class DevelopmentConfig(Config):
     # master
     MASTER_HOST = 'localhost'
 
+    # slave
+    SPIDER_PATH = '/Users/heyao/heretofore/heretofore/htfspider'
+    SPIDER_PID_FILE_PATH = '/Users/heyao/heretofore/heretofore/var'
+
     # celery
     BROKER_URL = 'redis://localhost:6379/1'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
