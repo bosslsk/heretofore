@@ -37,11 +37,9 @@ class YunqiIndexSpider(RedisSpider):
         for element in elements:
             item = BookListItem()
             item['url'] = response.urljoin(element.xpath('./a/@href').extract()[0])
-            item['book_id'] = element.xpath('./div[@class="book_info"]/h3/a/@id').extract()[0].split('_')[1]
-            item['title'] = element.xpath('./div[@class="book_info"]/h3/a/text()').extract()[0]
-            item['author'] = element.xpath('./div[@class="book_info"]/dd[@class="w_auth"]/a/text()').extract()[0]
-            # item['category'] = element.xpath('./td/a/text()').extract()[0].split('/')[0][1:]
-            # item['sub_category'] = element.xpath('./td/a/text()').extract()[0].split('/')[1][:-1]
+            item['book_id'] = element.xpath('./div/h3/a/@id').extract()[0].split('_')[1]
+            item['title'] = element.xpath('./div/h3/a/text()').extract()[0]
+            item['author'] = element.xpath('./div//dd[@class="w_auth"]/a/text()').extract()[0]
             updated_at = '20' + element.xpath('./div[@class="book_info"]/dl[2]/dd[1]/text()').extract()[0].split(' ')[0]
             item['updated_at'] = datetime.strptime(updated_at, '%Y-%m-%d')
             yield Request(
