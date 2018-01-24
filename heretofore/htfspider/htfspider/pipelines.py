@@ -25,6 +25,12 @@ class HtfspiderPipeline(object):
                 upsert=True
             )
         else:
+            if item.get('status', 1) == 0:
+                self.db['book_index'].update_one(
+                    {'_id': '%s_%s' % (item['source_id'], item['book_id'])},
+                    {'$set': {'status': 0, 'updated_at': datetime.datetime.now(), 'remove_reason': '被主站移除'}}
+                )
+                return item
             self.db['book_detail'].update_one(
                 {'_id': '%s_%s' % (item['source_id'], item['book_id'])},
                 {'$set': item},

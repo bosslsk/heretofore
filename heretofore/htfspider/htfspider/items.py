@@ -54,6 +54,7 @@ class BookDetailItem(scrapy.Item):
     book_status = scrapy.Field()  # 书连载状态
     book_updated_at = scrapy.Field()  # 书更新时间
     fans = scrapy.Field()  # 粉丝等级数量
+    remove_reason = scrapy.Field()  # 被移除的原因
 
     # 对于历史的信息，应该有这些东西
     history_created_at = scrapy.Field()
