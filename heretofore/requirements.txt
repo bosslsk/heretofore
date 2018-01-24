@@ -19,7 +19,6 @@ ipython==5.5.0
 Jinja2==2.9.6
 kombu==4.1.0
 lxml==4.1.1
-MySQL-python==1.2.5
 psutil==5.0.1
 pymongo==3.4.0
 redis==2.10.5
