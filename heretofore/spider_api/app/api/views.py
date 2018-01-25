@@ -79,7 +79,7 @@ def memory():
     :return: 
     """
     memory_info = current_app.monitor_process.memory_state()
-    keys = ['total', 'free', 'available', 'used', 'active', 'inactive', 'wired']
+    keys = ['total', 'free', 'available', 'used', 'active', 'inactive']
     percent = memory_info.percent
     memory_info = {k: round(getattr(memory_info, k) * 1. / 1024 / 1024, 2) for k in keys}
     memory_info['percent'] = percent
