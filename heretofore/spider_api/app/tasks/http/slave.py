@@ -7,20 +7,16 @@ author @heyao
 
 import time
 
-import requests
-
 from heretofore.runner.log import LogSystem
 from heretofore.spider_settings import source_dict, data_coll_dict
+from heretofore.utils import authorized_requests
 from ... import celery, mongodb
 
 
 def schedule_spider(method, spider_name, host='localhost'):
     path = '/api/{method}/{name}'.format(method=method, name=spider_name)
     url = 'http://{host}{path}'.format(host=host, path=path)
-    headers = {'User-Agent': 'htf-slave'}
-    response = requests.get(url, headers=headers)
-    content = response.content
-    response.close()
+    content = authorized_requests('GET', url)
     return content
 
 

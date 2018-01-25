@@ -5,7 +5,6 @@ create on 2017-09-06 下午3:04
 author @heyao
 """
 
-import requests
 from flask import request
 
 from app.exceptions import BadRequest
@@ -52,12 +51,3 @@ class RequestParser(object):
 
     def parse_args(self):
         return self._args
-
-
-def authorized_requests(method, url, usermame=None, password=None, **kwargs):
-    headers = kwargs.pop('headers', {})
-    headers.update({'User-Agent': 'htf-slave'})
-    response = requests.request(method, url, headers=headers, auth=(usermame, password), **kwargs)
-    content = response.content
-    response.close()
-    return content
