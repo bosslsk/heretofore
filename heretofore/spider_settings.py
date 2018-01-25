@@ -7,10 +7,9 @@ author @heyao
 
 source_dict = {
     'qidian': 1,
-    'zh': 2,
-    'xx': 6,
+    'xxsy': 6,
     'jjwxc': 7,
-    'yq': 11,
+    'yunqi': 11,
     'qdmm': 21,
     'chuangshi': 8
 }
@@ -40,3 +39,33 @@ index_start_url_dict = {
         'total_page': 70
     }
 }
+
+host_list = ['localhost', '127.0.0.1']
+
+index_spider_dict = {
+    'qidian_index': 1,
+    'qdmm_index': 1,
+    # 'xxsy_index': 1,
+    'jjwxc_index': 1,
+    'chuangshi_index': 1,
+    # 'yunqi_index': 1
+}
+
+detail_spider_dict = {
+    'qidian_detail': 1,
+    'qdmm_detail': 1,
+    # 'xxsy_detail': 1,
+    'jjwxc_detail': 1,
+    'chuangshi_detail': 1,
+    # 'yunqi_detail': 1
+}
+
+mongo_uri = 'mongodb://localhost:27017'
+db_name = 'htf_spider'
+mongo_auth = {}
+redis_uri = 'redis://localhost:6379'
+
+try:
+    from product_spider_settings import *
+except ImportError:
+    pass
