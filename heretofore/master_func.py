@@ -5,20 +5,15 @@ create on 2018-01-18 下午5:51
 author @heyao
 """
 
-import time
 import json
 import cPickle as pickle
 
-import redis
-import pymongo
-import requests
 from copy import deepcopy
 
 from hm_collections.queue.redis_queue import RedisSetQueue
 
 from heretofore.runner.log import LogSystem
-from heretofore.spider_settings import source_dict, data_coll_dict, master_host, index_start_url_dict
-from heretofore.runner.scheduler import SpiderTaskScheduler
+from heretofore.spider_settings import source_dict, data_coll_dict, index_start_url_dict
 from heretofore.spider_api.app.utils import authorized_requests
 
 
@@ -53,7 +48,7 @@ def generate_data(spider_name, mongodb, limit=0):
             i['data_url'] = 'http://app.jjwxc.org/androidapi/novelbasicinfo?novelId={}'.format(i['book_id'])
         else:
             i['data_url'] = i['url']
-        if spider_name == 'qidian_detail':
+        if spider_name in ('qidian_detail', 'qdmm_detail'):
             i['csrf_token'] = ''
     return data
 
@@ -106,52 +101,3 @@ def distribute_info(host_dict, spider_dict, mongodb):
                 if remain_times == 0:
                     remove_host.append(host)
     return spider_data, result
-
-
-# ======================================================
-# =================== workers 确定 ======================
-# 1. 获取每个slave的cpu和memory信息
-# 2. 根据每个爬虫占用的cpu和memory信息，估算每个slave可以运行的爬虫数量（每台slave至少保留10%的CPU和内存）
-# 3. 生成运行爬虫的参数，运行爬虫
-
-
-if __name__ == '__main__':
-    scheduler = SpiderTaskScheduler('/Users/heyao/heretofore/heretofore/htf_spider',
-                                    '/Users/heyao/heretofore/heretofore/var')
-    con = pymongo.MongoClient()
-    r = redis.StrictRedis()
-    db = con['htf_spider']
-    dt = time.strftime('%Y-%m-%d')
-    limit = 30
-
-    host_list = ['localhost', '192.168.1.18']
-    spider_dict = {
-        'qidian_detail': 1,
-        'jjwxc_detail': 1
-    }
-    data = {}
-    for host in host_list:
-        max_spider_num = get_cpu_momery_info(host, per_cpu=10, per_memory=200)
-        data[host] = max_spider_num
-    spider_data, dis_dict = distribute_info(data, spider_dict, db)
-    for spider, host in dis_dict:
-        workers = dis_dict[(spider, host)]
-        total_items = len(spider_data[spider])
-        print 'schdule', spider, 'on', host, 'for', workers, 'times with', total_items, 'item'
-        start_spider(r, db, spider, dt, spider_data[spider], host, workers)
-
-        # print 'start index'
-        # host = 'localhost'
-        # # index_spiders = ['qidian_index', 'jjwxc_index']
-        # # detail_spiders = ['qidian_detail', 'jjwxc_detail']
-        # detail_spiders = ['jjwxc_detail']
-        # # for index_spider in index_spiders:
-        # #     start_spider(r, db, index_spider, dt, host=host, workers=4)
-        # # print 'waiting'
-        # # while any(not scheduler.is_finished(sp, r) for sp in index_spiders):
-        # #     time.sleep(15)
-        #
-        # # time.sleep(120)
-        # print 'start detail'
-        # for detail_spider in detail_spiders:
-        #     start_spider(r, db, detail_spider, dt, host=host, workers=4)

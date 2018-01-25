@@ -15,7 +15,7 @@ from heretofore.sh import MonitProcess
 class SpiderTaskScheduler(object):
     def __init__(self, spider_path, spider_pid_file_path, project_name='htfspider',
                 short_command_format='scrapy crawl {spider_name}',
-                command_format='cd {path};scrapy crawl {spider_name} & >> /Users/heyao/Desktop/heretofore/{spider_name}.log 2>&1'):
+                command_format='cd {path};scrapy crawl {spider_name} &'):
         self.spider_path = spider_path
         self.spider_pid_file_path = os.path.join(spider_pid_file_path, 'spider_%(spider_name)s.pid')
         self.project_name = project_name
