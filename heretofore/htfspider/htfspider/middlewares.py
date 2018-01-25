@@ -11,6 +11,8 @@ from scrapy import signals
 from scrapy.exceptions import NotConfigured
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
 
+from heretofore.utils import authorized_requests
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +41,7 @@ class ErrorSaveMiddleware(object):
         data = dict(error=failure.getTraceback(), url=response.url, spider=spider.name, error_type=1)
         url = 'http://{host}/api/traceback/save/{name}'.format(host=self.master_host, name=spider.name)
         data['formdata'] = response.request.body
-        requests.post(url, json={'data': data})
+        authorized_requests('POST', url, json={'data': data})
 
 
 class CustomerRetryMiddleware(RetryMiddleware):
@@ -73,7 +75,7 @@ class CustomerRetryMiddleware(RetryMiddleware):
                 error_type=0
             )
             url = 'http://{host}/api/traceback/save/{name}'.format(host=self.master_host, name=spider.name)
-            requests.post(url, json={'data': data})
+            authorized_requests('POST', url, json={'data': data})
             logger.debug("Gave up retrying %(request)s (failed %(retries)d times): %(reason)s",
                          {'request': request, 'retries': retries, 'reason': reason},
                          extra={'spider': spider})

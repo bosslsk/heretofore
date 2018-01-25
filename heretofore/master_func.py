@@ -14,7 +14,7 @@ from hm_collections.queue.redis_queue import RedisSetQueue
 
 from heretofore.runner.log import LogSystem
 from heretofore.spider_settings import source_dict, data_coll_dict, index_start_url_dict
-from heretofore.spider_api.app.utils import authorized_requests
+from heretofore.utils import authorized_requests
 
 
 def generate_id_coll(spider_name):
@@ -63,15 +63,15 @@ def start_spider(redis_server, mongodb, spider_name, dt, data, host='localhost',
         queue.push(i)
     url = 'http://{host}/api/schedul/{spider}?workers={workers}'.format(
         host=host, spider=spider_name, workers=workers)
-    authorized_requests('GET', url, usermame='', password='')
+    authorized_requests('GET', url, username='', password='')
     return True
 
 
 def get_cpu_momery_info(host, per_cpu=10, per_memory=200):
     url_cpu = 'http://{host}/api/cpu'.format(host=host)
     url_memory = 'http://{host}/api/memory'.format(host=host)
-    cpu_info = json.loads(authorized_requests('GET', url_cpu, usermame='', password=''))
-    memory_info = json.loads(authorized_requests('GET', url_memory, usermame='', password=''))
+    cpu_info = json.loads(authorized_requests('GET', url_cpu, username='', password=''))
+    memory_info = json.loads(authorized_requests('GET', url_memory, username='', password=''))
     cpu_data = 100 - cpu_info['data']['cpu_percent'] - 10
     memory_percent = 100 - memory_info['data']['percent'] - 10
     memory_total = memory_info['data']['total']
