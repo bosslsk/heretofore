@@ -7,13 +7,13 @@ author @heyao
 
 import logging
 
-import requests
 from scrapy.conf import settings
 from twisted.internet import task
 
 from scrapy.exceptions import NotConfigured
-from scrapy.signalmanager import SignalManager
 from scrapy import signals
+
+from heretofore.utils import authorized_requests
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class SpiderOnOpenClose(object):
         self.task = task.LoopingCall(self.auto_stop, spider)
         self.task.start(self.interval)
         # 发送开始消息
-        requests.get('http://{host}/api/ready/start/{name}'.format(host=settings.get("MASTER_HOST"), name=spider.name))
+        authorized_requests('GET', 'http://{host}/api/ready/start/{name}'.format(host=settings.get("MASTER_HOST"), name=spider.name))
         logger.info('open spider %s' % spider.name)
 
     def auto_stop(self, spider):
@@ -73,5 +73,5 @@ class SpiderOnOpenClose(object):
         if self.task and self.task.running:
             self.task.stop()
         # 发送退出消息，让master发送SIGINT指令
-        requests.get('http://{host}/api/ready/stop/{name}'.format(host=settings.get("MASTER_HOST"), name=spider.name))
+        authorized_requests('GET', 'http://{host}/api/ready/stop/{name}'.format(host=settings.get("MASTER_HOST"), name=spider.name))
         logger.info('close spider %s, reason %s' % (spider.name, reason))
