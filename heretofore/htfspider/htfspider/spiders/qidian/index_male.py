@@ -80,7 +80,12 @@ class QidianMaleIndexSpider(RedisSpider):
         item['book_id'] = response.url.split('/')[-1]
         item['folder_url'] = response.urljoin(response.xpath(xpath_folder_url).extract()[0]).strip()
         item['title'] = response.xpath(xpath_title).extract()[0]
-        item['author'] = response.xpath(xpath_author).extract()[0]
+        try:
+            item['author'] = response.xpath(xpath_author).extract()[0]
+        except IndexError:
+            with open('%s.html' % item['book_id'], 'w') as f:
+                f.write(response.body)
+            return
         item['author_id'] = response.xpath(xpath_author_id).extract()[0].split('=')[-1]
         item['category'] = response.xpath(xpath_category).extract()[0]
         item['sub_category'] = response.xpath(xpath_sub_category).extract()[1]
@@ -100,7 +105,10 @@ class QidianMaleIndexSpider(RedisSpider):
 
     def parse_published_at(self, response):
         item = response.meta['item']
-        published_at = response.xpath('//div[@class="info-list cf"]/ul/li[2]/em/text()').extract()[0]
+        try:
+            published_at = response.xpath('//div[@class="info-list cf"]/ul/li[2]/em/text()').extract()[0]
+        except IndexError:
+            return
         item['published_at'] = datetime.datetime.strptime(published_at, '%Y.%m.%d')
         item['status'] = 1
         item['created_at'] = self.today
