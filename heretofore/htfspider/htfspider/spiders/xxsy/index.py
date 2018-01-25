@@ -9,6 +9,8 @@ import time
 from datetime import datetime
 import cPickle as pickle
 
+import pymongo
+from scrapy.conf import settings
 from scrapy import Request
 from scrapy_redis.spiders import RedisSpider
 
@@ -19,6 +21,18 @@ class XxsyIndexSpider(RedisSpider):
     name = 'xxsy_index'
     redis_key = 'xxsy:index'
     today = datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
+
+    def __init__(self):
+        super(XxsyIndexSpider, self).__init__()
+        mongo_uri = settings.get("MONGO_URI")
+        db_name = settings.get("DB_NAME")
+        auth = settings.get("AUTH")
+        client = pymongo.MongoClient(mongo_uri)
+        db = client[db_name]
+        if auth:
+            db.authenticate(**auth)
+        books = set(i['book_id'] for i in db['book_index'].find({'source_id': 1}, {'book_id': 1}))
+        self.books = books
 
     def make_request_from_data(self, data):
         data = pickle.loads(data)
