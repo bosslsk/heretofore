@@ -16,6 +16,9 @@ class HtfspiderPipeline(object):
         self.client = pymongo.MongoClient(settings.get("MONGO_URI"))
         db = self.client[settings.get("DB_NAME")]
         self.db = db
+        auth = settings.get('AUTH')
+        if auth:
+            self.db.authenticate(**auth)
 
     def process_item(self, item, spider):
         if '_index' in spider.name:
