@@ -2,7 +2,7 @@
 """
     @author: harvey
     @time: 2018/1/22 14:48
-    @subject: 创世 http://chuangshi.qq.com
+    @subject: 云起小说网 http://yunqi.qq.com
 """
 import re
 import json
@@ -23,9 +23,9 @@ class YunqiDetailSpider(RedisSpider):
     redis_key = 'yunqi:detail'
     today = datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
 
-    def make_requests_from_url(self, data):
+    def make_request_from_data(self, data):
         data = pickle.loads(data)
-        url = data.pop('data_url')
+        url = data.pop('data_url', None)
         if url:
             req = Request(
                 url,
