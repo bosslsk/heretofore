@@ -22,8 +22,8 @@ class QidianMaleIndexSpider(RedisSpider):
     redis_key = 'qidian:index'
     today = datetime.datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
 
-    def __init__(self):
-        super(QidianMaleIndexSpider, self).__init__()
+    def __init__(self, **kwargs):
+        super(QidianMaleIndexSpider, self).__init__(**kwargs)
         mongo_uri = settings.get("MONGO_URI")
         db_name = settings.get("DB_NAME")
         auth = settings.get("AUTH")

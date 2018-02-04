@@ -16,5 +16,5 @@ class QdmmIndexSpider(QidianMaleIndexSpider):
     redis_key = 'qdmm:index'
     today = datetime.datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
 
-    def __init__(self):
-        super(QdmmIndexSpider, self).__init__()
+    def __init__(self, **kwargs):
+        super(QdmmIndexSpider, self).__init__(**kwargs)

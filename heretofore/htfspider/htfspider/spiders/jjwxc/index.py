@@ -24,8 +24,8 @@ class JjwxcIndexSpider(RedisSpider):
     redis_key = 'jjwxc:index'
     today = datetime.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d')
 
-    def __init__(self):
-        super(JjwxcIndexSpider, self).__init__()
+    def __init__(self, **kwargs):
+        super(JjwxcIndexSpider, self).__init__(**kwargs)
         mongo_uri = settings.get("MONGO_URI")
         db_name = settings.get("DB_NAME")
         auth = settings.get("AUTH")
