@@ -6,7 +6,7 @@ author @heyao
 """
 
 import os
-from heretofore.runner.scheduler import SpiderTaskScheduler
+from heretofore.runner.scheduler import SpiderTaskScheduler, ScrapydScheduler
 from heretofore.sh import MonitProcess
 
 
@@ -19,6 +19,7 @@ class Config(object):
 
     @staticmethod
     def init_app(app):
-        app.scheduler = SpiderTaskScheduler(spider_path=app.config['SPIDER_PATH'],
-                                            spider_pid_file_path=app.config['SPIDER_PID_FILE_PATH'])
+        # app.scheduler = SpiderTaskScheduler(spider_path=app.config['SPIDER_PATH'],
+        #                                     spider_pid_file_path=app.config['SPIDER_PID_FILE_PATH'])
+        app.scheduler = ScrapydScheduler('htfspider')
         app.monitor_process = MonitProcess()
